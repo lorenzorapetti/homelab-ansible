@@ -1,0 +1,14 @@
+- name: Download env from Doppler
+  ansible.builtin.shell:
+    chdir: "{{ repo_dest }}/{{ project }}"
+    cmd: "doppler secrets download --no-file --format env --token {{ doppler_tokens[project] }} > .env"
+    executable: /bin/bash
+  no_log: true
+
+- name: Deploy projects
+  community.docker.docker_compose_v2:
+    project_src: "{{ repo_dest }}/{{ project }}"
+    recreate: always
+    remove_orphans: true
+    wait: true
+    wait_timeout: 60

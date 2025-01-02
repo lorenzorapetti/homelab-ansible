@@ -1,0 +1,11 @@
+public_key_file: ~/.ssh/ansible_ed25519.pub
+ansible_become_pass_salt: uihrfkjc57h
+github_ssh_public_key: |
+  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIITLMIi0x/za8d1E3Xdtta7K9+NgOLMF8pCGtAFxNzrA
+
+ansible_become_pass_hash: "{{ ansible_become_pass | password_hash('sha512', ansible_become_pass_salt) }}"
+
+project_hosts:
+  homepage: tyr
+  authentik: heimdall
+  semaphore: heimdall

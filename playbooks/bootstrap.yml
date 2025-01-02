@@ -1,0 +1,56 @@
+---
+- name: Initial server setup
+  hosts: servers
+  remote_user: root
+
+  vars:
+    group: netadmins
+    user: ansible
+
+  tasks:
+    - name: "Add {{ group }} group"
+      group:
+        name: "{{ group }}"
+
+    - name: "Add {{ group }} to sudoers"
+      community.general.sudoers:
+        name: "{{ group }}"
+        group: "{{ group }}"
+        commands: ALL
+        nopassword: false
+
+    - name: "Create {{ user }} user"
+      user:
+        name: "{{ user }}"
+        groups: "{{ group }}"
+        password: "{{ ansible_become_pass_hash }}"
+      no_log: true
+
+    - name: Add the ssh key to the user authorized_keys
+      authorized_key:
+        key: "{{ item }}"
+        user: "{{ user }}"
+      with_file:
+        - "{{ public_key_file }}"
+
+    - name: Install required packages
+      package:
+        name: git
+
+    - name: Install Doppler CLI
+      script:
+        cmd: ../scripts/install-doppler-cli.sh
+        creates: /usr/bin/doppler
+
+    - name: Copy GitHub SSH private key
+      copy:
+        content: "{{ github_ssh_key }}"
+        dest: ~/.ssh/github_ed25519
+        mode: '0600'
+      no_log: true
+
+    - name: Import GitHub SSH public key
+      copy:
+        content: "{{ github_ssh_public_key }}"
+        dest: ~/.ssh/github_ed25519.pub
+        mode: '0644'

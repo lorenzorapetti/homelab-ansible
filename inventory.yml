@@ -1,0 +1,21 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+  children:
+    homelab:
+      hosts:
+        odin:
+          ansible_host: odin.lan
+        tyr:
+          ansible_host: tyr.lan
+        heimdall:
+          ansible_host: heimdall.lan
+    ubuntu:
+      hosts:
+        tyr:
+        heimdall:
+    servers:
+      hosts:
+        tyr:
+        heimdall:
