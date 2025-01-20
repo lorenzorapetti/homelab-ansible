@@ -6,6 +6,16 @@ github_ssh_public_key: |
 ansible_become_pass_hash: "{{ ansible_become_pass | password_hash('sha512', ansible_become_pass_salt) }}"
 
 project_hosts:
-  homepage: tyr
-  authentik: heimdall
-  semaphore: heimdall
+  homepage:
+    - tyr
+  authentik:
+    - heimdall
+  semaphore:
+    - heimdall
+  linkwarden:
+    - tyr
+  ollama:
+    - heimdall
+  backrest:
+    - heimdall
+    - tyr

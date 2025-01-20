@@ -4,11 +4,14 @@
     cmd: "doppler secrets download --no-file --format env --token {{ doppler_tokens[project] }} > .env"
     executable: /bin/bash
   no_log: true
+  when: doppler_tokens[project] is defined
+  changed_when: false
 
-- name: Deploy projects
+- name: "Deploy {{ project }}"
   community.docker.docker_compose_v2:
     project_src: "{{ repo_dest }}/{{ project }}"
     recreate: always
     remove_orphans: true
     wait: true
     wait_timeout: 60
+    pull: "{{ 'always' if pull_images else 'policy' }}"

@@ -5,13 +5,14 @@
 
   vars:
     repo_dest: /docker/homelab
+    pull_images: false
 
   tasks:
     - name: Make sure that the clone destination directory is present
       ansible.builtin.file:
         path: "{{ repo_dest }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
 
     - name: Clone Docker Compose repo
       ansible.builtin.git:
@@ -22,9 +23,22 @@
         accept_hostkey: true
       register: git
 
+    - name: Force deploy if the project var is defined
+      when: project is defined
+      block:
+        - name: Print deploy msg
+          ansible.builtin.debug:
+            msg: Forcing deploy of project {{ project }}
+
+        - name: Deploy
+          ansible.builtin.include_tasks: ../tasks/deploy_project.yml
+          when: project_hosts[project] is defined and inventory_hostname in project_hosts[project]
+
+        - name: End play early
+          ansible.builtin.meta: end_play
+
     - name: Exit early if no changes are detected
-      # when: git.before == git.after
-      when: false
+      when: git.before == git.after
       block:
         - name: Print end play msg
           ansible.builtin.debug:
@@ -36,14 +50,14 @@
     - name: Get projects that have changed
       ansible.builtin.shell:
         chdir: "{{ repo_dest }}"
-        cmd: "set -o pipefail && git diff --dirstat=files,0 HEAD~1 | sed 's/^[ 0-9.]\\+% //g' | cut -d '/' -f1"
+        cmd: "set -o pipefail && git diff --dirstat=files,0 {{ git.before }} | sed 's/^[ 0-9.]\\+% //g' | cut -d '/' -f1"
         executable: /bin/bash
       changed_when: false
       register: projects
 
     - name: Deploy
-      ansible.builtin.include_tasks: deploy_project.yml
+      ansible.builtin.include_tasks: ../tasks/deploy_project.yml
       loop: "{{ projects.stdout_lines }}"
       loop_control:
         loop_var: project
-      when: project_hosts[project] is defined and doppler_tokens[project] is defined and inventory_hostname == project_hosts[project]
+      when: project_hosts[project] is defined and inventory_hostname in project_hosts[project]

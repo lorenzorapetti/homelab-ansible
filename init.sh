@@ -120,4 +120,4 @@ if [ ! -f ".ansible-vault-password" ]; then
 fi
 
 # Install ansible and ansible-galaxy requirements
-# sudo -u $SUDO_USER ansible-galaxy install -r requirements.yml
+sudo -u $SUDO_USER ansible-galaxy install -r requirements.yml
