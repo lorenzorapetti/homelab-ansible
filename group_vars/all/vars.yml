@@ -19,3 +19,9 @@ project_hosts:
   backrest:
     - heimdall
     - tyr
+  ntfy:
+    - tyr
+  uptimekuma:
+    - heimdall
+  wud:
+    - heimdall
